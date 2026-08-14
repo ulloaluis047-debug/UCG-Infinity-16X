@@ -17,15 +17,22 @@ jobs:
         run: cmake -S . -B build -G "Visual Studio 17 2022" -A x64
       - name: Build
         run: cmake --build build --config Release --target UCGInfinity16X_VST3 UCGInfinity16X_Standalone
+      - name: Configure 32-bit Hypersonic bridge
+        run: cmake -S . -B build-bridge -G "Visual Studio 17 2022" -A Win32 -DUCG_BRIDGE_HELPER_ONLY=ON
+      - name: Build 32-bit Hypersonic bridge
+        run: cmake --build build-bridge --config Release --target UCGLegacyHost32
       - name: Find products
         shell: pwsh
         run: |
           $vst = Get-ChildItem build -Recurse -Filter "UCG Infinity 16X.vst3" | Select-Object -First 1
           $exe = Get-ChildItem build -Recurse -Filter "UCG Infinity 16X.exe" | Select-Object -First 1
+          $bridge = Get-ChildItem build-bridge -Recurse -Filter "UCGLegacyHost32.exe" | Select-Object -First 1
           if (-not $vst) { throw "VST3 output not found" }
+          if (-not $bridge) { throw "32-bit bridge output not found" }
           New-Item -ItemType Directory -Force dist | Out-Null
           Copy-Item $vst.FullName dist -Recurse
           if ($exe) { Copy-Item $exe.FullName dist }
+          Copy-Item $bridge.FullName dist
       - name: Install Inno Setup
         run: choco install innosetup --no-progress -y
       - name: Build Setup
@@ -39,4 +46,3 @@ jobs:
             dist/**
             installer/Output/UCG-Infinity-16X-Setup.exe
           if-no-files-found: error
-
