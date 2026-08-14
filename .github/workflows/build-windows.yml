@@ -1,0 +1,42 @@
+name: Build Windows VST3 and Installer
+
+on:
+  push:
+    branches: [main, "agent/**"]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-2022
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure
+        run: cmake -S . -B build -G "Visual Studio 17 2022" -A x64
+      - name: Build
+        run: cmake --build build --config Release --target UCGInfinity16X_VST3 UCGInfinity16X_Standalone
+      - name: Find products
+        shell: pwsh
+        run: |
+          $vst = Get-ChildItem build -Recurse -Filter "UCG Infinity 16X.vst3" | Select-Object -First 1
+          $exe = Get-ChildItem build -Recurse -Filter "UCG Infinity 16X.exe" | Select-Object -First 1
+          if (-not $vst) { throw "VST3 output not found" }
+          New-Item -ItemType Directory -Force dist | Out-Null
+          Copy-Item $vst.FullName dist -Recurse
+          if ($exe) { Copy-Item $exe.FullName dist }
+      - name: Install Inno Setup
+        run: choco install innosetup --no-progress -y
+      - name: Build Setup
+        shell: pwsh
+        run: iscc installer/UCG-Infinity-16X.iss
+      - name: Upload complete package
+        uses: actions/upload-artifact@v4
+        with:
+          name: UCG-Infinity-16X-Windows-x64
+          path: |
+            dist/**
+            installer/Output/UCG-Infinity-16X-Setup.exe
+          if-no-files-found: error
+
