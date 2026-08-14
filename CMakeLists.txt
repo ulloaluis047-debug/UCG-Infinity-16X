@@ -1,12 +1,20 @@
 cmake_minimum_required(VERSION 3.22)
 project(UCGInfinity16X VERSION 0.1.0 LANGUAGES CXX)
 
+option(UCG_BRIDGE_HELPER_ONLY "Build only the 32-bit legacy Hypersonic helper" OFF)
+
 if (NOT WIN32)
   message(STATUS "UCG Infinity 16X is primarily packaged for Windows x64")
 endif()
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+if (UCG_BRIDGE_HELPER_ONLY)
+  add_executable(UCGLegacyHost32 WIN32 Bridge/LegacyHost32.cpp)
+  target_compile_definitions(UCGLegacyHost32 PRIVATE UNICODE _UNICODE)
+  return()
+endif()
 
 include(FetchContent)
 FetchContent_Declare(JUCE
