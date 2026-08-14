@@ -15,6 +15,7 @@ private:
     UCGInfinity16XAudioProcessor& processor;
     juce::Label title, preset, status;
     juce::TextButton scanButton { "SCAN CONTENT" };
+    std::unique_ptr<juce::FileChooser> fileChooser;
     juce::ListBox parts;
     class PartModel final : public juce::ListBoxModel
     {
