@@ -17,8 +17,14 @@ UCGInfinity16XAudioProcessorEditor::UCGInfinity16XAudioProcessorEditor(UCGInfini
     parts.setColour(juce::ListBox::backgroundColourId, juce::Colour(0xff0b1119));
     scanButton.onClick = [this]
     {
-        juce::FileChooser chooser("Selecciona CONTENT", {}, "*");
-        if (chooser.browseForDirectory()) inspect(chooser.getResult());
+        fileChooser = std::make_unique<juce::FileChooser>("Selecciona CONTENT", juce::File{}, "*");
+        fileChooser->launchAsync(juce::FileBrowserComponent::openMode
+                                   | juce::FileBrowserComponent::canSelectDirectories,
+                                 [this](const juce::FileChooser& chooser)
+                                 {
+                                     const auto folder = chooser.getResult();
+                                     if (folder.isDirectory()) inspect(folder);
+                                 });
     };
     for (auto* c : std::initializer_list<juce::Component*>{&title,&preset,&status,&scanButton,&parts}) addAndMakeVisible(c);
 }
