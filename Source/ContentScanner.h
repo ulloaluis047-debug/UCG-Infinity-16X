@@ -3,9 +3,12 @@
 
 struct UcgContentItem
 {
-    enum class Type { audio, sfz, hypersonicPreset, nexusPreset, unknown };
+    enum class Type { audio, sfz, milanSampleBank, milanPatchBank,
+                      hypersonicPreset, nexusPreset, unknown };
     juce::File file;
     juce::String name;
+    juce::String bankId;
+    juce::StringArray presetNames;
     Type type = Type::unknown;
     bool playable = false;
 };
