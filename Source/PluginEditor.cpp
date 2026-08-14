@@ -69,15 +69,20 @@ void UCGInfinity16XAudioProcessorEditor::inspect(const juce::File& target)
     if (target.isDirectory())
     {
         const auto items = ContentScanner::scan(target);
-        int playable = 0, hyper = 0, nexus = 0;
+        int playable = 0, hyper = 0, nexus = 0, milanBanks = 0, milanPresets = 0;
         for (const auto& i : items)
         {
             playable += i.playable ? 1 : 0;
             hyper += i.type == UcgContentItem::Type::hypersonicPreset ? 1 : 0;
             nexus += i.type == UcgContentItem::Type::nexusPreset ? 1 : 0;
+            milanBanks += (i.type == UcgContentItem::Type::milanSampleBank
+                           || i.type == UcgContentItem::Type::milanPatchBank) ? 1 : 0;
+            milanPresets += i.presetNames.size();
         }
-        status.setText(juce::String(items.size()) + " ARCHIVOS · " + juce::String(playable) + " LISTOS · "
-                       + juce::String(hyper) + " HYPERSONIC · " + juce::String(nexus) + " NEXUS",
+        status.setText(juce::String(milanBanks) + " BANCOS MILAN · "
+                       + juce::String(milanPresets) + " PRESETS · "
+                       + juce::String(playable) + " AUDIO · "
+                       + juce::String(hyper) + " FXP HYP · " + juce::String(nexus) + " FXP NEXUS",
                        juce::dontSendNotification);
         return;
     }
